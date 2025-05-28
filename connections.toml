@@ -1,0 +1,8 @@
+[myconnection]
+account = "STEAM-DEVELOPER"
+user = "jdelim"
+password = "******"
+warehouse = "COMPUTE_WH"
+database = "STEAM_DATA_STAGING"
+schema = "STEAMCODERS"
+
