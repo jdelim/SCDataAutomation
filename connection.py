@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-from snowflake import Root
-from snowflake.snowspark import Session
-=======
 from snowflake.core import Root
 import snowflake.connector
 import os
 from dotenv import find_dotenv, load_dotenv
->>>>>>> 3d7b89ba6ff0eec08cf9244749ebc54bc69598a4
 
 dotenv_path = find_dotenv()
 # load up entries as env variables
