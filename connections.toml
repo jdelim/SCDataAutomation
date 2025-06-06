@@ -1,8 +1,7 @@
-[myconnection]
-account = "STEAM-DEVELOPER"
-user = "jdelim"
-password = "******"
-warehouse = "COMPUTE_WH"
-database = "STEAM_DATA_STAGING"
-schema = "STEAMCODERS"
-
+[connections.my_example_connection]
+user = "${SNOWFLAKE_USER}"
+password = "${SNOWFLAKE_PASSWORD}"
+account = "${SNOWFLAKE_ACCOUNT}"
+warehouse = "${SNOWFLAKE_WAREHOUSE}"
+database = "${SNOWFLAKE_DATABASE}"
+schema = "${SNOWFLAKE_SCHEMA}"
