@@ -7,14 +7,18 @@ dotenv_path = find_dotenv()
 # load up entries as env variables
 load_dotenv(dotenv_path)
 user = os.getenv("user")
-password = os.getenv("password")
 account = os.getenv("account")
+private_key_path = os.getenv("private_key_path")
+
+# read private key
+with open(private_key_path, "rb") as key_file:
+    private_key_bytes = key_file.read()
 
 # use this for now bc TOML file not being identified
 conn = snowflake.connector.connect(
     user=user,
-    password=password,
     account=account,
+    private_key=private_key_bytes,
     warehouse='COMPUTE_WH',
     database='STEAMCODERS',
     schema='STEAM_DATA_STAGING'
