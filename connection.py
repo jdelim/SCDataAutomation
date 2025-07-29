@@ -50,4 +50,4 @@ print("Warehouse: ", conn.warehouse)
 print("Database: ", conn.database)
 print("Schema: ", conn.schema)
 
-InsertEvent("Caltech Y Robotics 2024 Summer Session", 3500, "2024-07-01", "2024-07-19")
+
