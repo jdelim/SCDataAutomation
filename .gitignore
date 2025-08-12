@@ -1,3 +1,4 @@
 .env
 private_key.pem
 .der
+.venv/
