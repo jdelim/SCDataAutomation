@@ -4,7 +4,7 @@ import os
 from dotenv import find_dotenv, load_dotenv
 
 USER, ACCOUNT, PRIVATE_KEY_PATH = 'user', 'account', 'private_key_path'
-WAREHOUSE, DATABASE, SCHEMA = 'COMPUTE_WH', 'STEAMCODERS', 'STEAM_DATA_STAGING'
+WAREHOUSE, DATABASE, SCHEMA = 'COMPUTE_WH', 'STEAMCODERS', 'STEAM_DATA_PROD'
 
     
 def find_env_variables() -> list[str]: # user, account, privateKeyBytes
