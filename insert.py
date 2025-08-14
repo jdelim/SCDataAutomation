@@ -40,7 +40,7 @@ def clean_gender(rows: list[list]) -> list[list [str | int]]:
         new_row = []
         for val in row:
             if isinstance(val, str):
-                new_val = mapping.get(val.upper(), val)
+                new_val = mapping.get(val.upper(), val) # FIXME need to pattern match to mapping
             else:
                 new_val = val
             new_row.append(new_val)
@@ -48,14 +48,47 @@ def clean_gender(rows: list[list]) -> list[list [str | int]]:
     return data
 
 def clean_ethnicity(rows: list[list]) -> list[list [str | int]]:
-    pass #TODO [SCD-32] Complete clean_ethnicity method
+    mapping = {'AMERICAN INDIAN': 1, 'ALASKA NATIVE': 1,
+               'ASIAN': 2, 'BLACK': 3, 'AFRICAN AMERICAN': 3,
+               'HISPANIC': 4, 'LATINO': 4, 'WHITE': 5,
+               'NATIVE HAWAIIAN': 6, 'PACIFIC ISLANDER': 6,
+               'MULTIRACIAL': 7, 'OTHER': 8}
+    updated_data = [[rows[0]]]
+    # check which column (index value) to check
+    ethnicity_column = find_column(rows[0], "ETHNICITY")
+    
+    # error check if column is not found
+    if ethnicity_column is None:
+        raise ValueError("Ethnicity column cannot be identified!")
+    
+    for row in rows[1:]:
+        new_row = []
+        for index, item in enumerate(row):
+            if index == ethnicity_column:
+                    print(item)
+                    if isinstance(item, str):
+                        ethnicity_id = mapping.get(item.upper()) # FIXME need to pattern match to mapping
+                    # error check if ethnicity not found in map
+                    if ethnicity_id is None:
+                        raise ValueError(f"{item} not found in map!")
+                    # update value in row to id #
+                    new_row.append(ethnicity_id)
+            else:
+                new_row.append(item)
+        updated_data.append(new_row)
+    return rows
 
 def clean_organization(rows: list[list]) -> list[list [str | int]]:
     pass 
 
 # organize tsv file headers
-def match_columns():
-    pass
+def find_column(columns: list, column_name: str) -> int | None: # takes in first row (columns) of our CSV rows
+    # print(columns)
+    for col_ind, column in enumerate(columns):
+        if column_name.upper() == column.upper():
+            return col_ind
+    return None
+    
 
 def create_tsv_with_headers(file_path: str) -> bool:
     headers = [
@@ -96,9 +129,9 @@ def pretty_print(data):
     return "\n".join(lines)
 
 def main():
-    #my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
-    #print(pretty_print(clean_gender(my_data)))
-    create_tsv_with_headers('data/test1.tsv')
+    my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
+    print(pretty_print(clean_ethnicity(my_data)))
+    #create_tsv_with_headers('data/test1.tsv')
 
 if __name__ == "__main__":
     main()
