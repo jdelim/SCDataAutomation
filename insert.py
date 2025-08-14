@@ -8,6 +8,8 @@ COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
 COL_7, COL_8, COL_9 = "ETHNICITY_ID", "STUDENT_CODE", "POSTAL_CODE"
 COL_10, COL_11, COL_12 = "IS_RETURNING_STUDENT_FLAG", "STUDENT_FIRST_NAME", "STUDENT_LAST_NAME"
 
+# read and clean CSV
+
 def readCSV(csv_file_path: str) -> list[list[int | str]] | None:
     try:
         with open(csv_file_path, mode='r', newline='') as file:
@@ -44,6 +46,16 @@ def clean_gender(rows: list[list]) -> list[list [str | int]]:
             new_row.append(new_val)
         data.append(new_row)
     return data
+
+def clean_ethnicity(rows: list[list]) -> list[list [str | int]]:
+    pass #TODO [SCD-32] Complete clean_ethnicity method
+
+def clean_organization(rows: list[list]) -> list[list [str | int]]:
+    pass 
+
+# organize tsv file headers
+def match_columns():
+    pass
 
 def create_tsv_with_headers(file_path: str) -> bool:
     headers = [
