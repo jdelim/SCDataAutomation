@@ -8,7 +8,7 @@ COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
 COL_7, COL_8, COL_9 = "ETHNICITY_ID", "STUDENT_CODE", "POSTAL_CODE"
 COL_10, COL_11, COL_12 = "IS_RETURNING_STUDENT_FLAG", "STUDENT_FIRST_NAME", "STUDENT_LAST_NAME"
 
-def readCSV(csv_file_path: str):
+def readCSV(csv_file_path: str) -> list[list[int | str]] | None:
     try:
         with open(csv_file_path, mode='r', newline='') as file:
             csv_reader = csv.reader(file)
@@ -28,7 +28,7 @@ def readCSV(csv_file_path: str):
     except Exception as e:
         print(f"An error has occurred: {e}")
 
-def clean_gender(rows):
+def clean_gender(rows: list[list]) -> list[list [str | int]]:
     # takes in rows (list of lists)
     mapping = {'M': 1, 'MALE': 1,
                'F': 2, 'FEMALE': 2,
