@@ -1,7 +1,7 @@
 from connection import find_env_variables, make_connection
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt #FIXME mpl and seaborn not being recognized after moving to src/
 
 def main():
     conn = make_connection(find_env_variables())

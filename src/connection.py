@@ -3,7 +3,7 @@ import snowflake.connector
 import os
 from dotenv import find_dotenv, load_dotenv
 
-USER, ACCOUNT, PRIVATE_KEY_PATH = 'user', 'account', 'private_key_path'
+USER, ACCOUNT, PRIVATE_KEY_PATH = 'USER', 'ACCOUNT', 'PRIVATE_KEY_PATH'
 WAREHOUSE, DATABASE, SCHEMA = 'COMPUTE_WH', 'STEAMCODERS', 'STEAM_DATA_PROD'
 
     
@@ -19,9 +19,13 @@ def find_env_variables() -> list[str]: # user, account, privateKeyBytes
         user = os.getenv(USER)
         account = os.getenv(ACCOUNT)
         private_key_path = os.getenv(PRIVATE_KEY_PATH)
-        
-        if not user or not account or not private_key_path:
-            raise ValueError("Missing one or more env variables!")
+
+        if not user :
+            raise ValueError("User env not found!")
+        if not account:
+            raise ValueError("Accoutn env not found!")
+        if not private_key_path:
+            raise ValueError("Private key path env not found!")
         
         if not os.path.exists(private_key_path):
             raise FileNotFoundError(f"Private key not found at: {private_key_path}!")
