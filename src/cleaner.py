@@ -2,6 +2,8 @@ import csv
 import pandas as pd
 import os
 import traceback
+import json
+from utils import create_mapping
 
 COL_1, COL_2, COL_3 = "EVENT_ID", "SESSION_ID", "AGE"
 COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
@@ -30,6 +32,50 @@ def readCSV(csv_file_path: str) -> list[list[int | str]] | None:
     except Exception as e:
         print(f"An error has occurred: {e}")
 
+def manual_find_column(column_name: str) -> int:
+    pass # TODO runs when program can't find column, prompt user for EXACT col name
+
+#FIXME works for gender, not ethnicity, must rewrite matching logic
+def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int]]:
+    mappings = create_mapping(column_name)
+    print(mappings)
+    col_pos = None
+    updated_rows = [[raw_rows[0]]]
+    
+    # find which column to check
+    for col_ind, col in enumerate(raw_rows[0]):
+        if column_name.upper() == col.upper():
+            col_pos = col_ind
+            break
+    # TODO if col_pos is None, call manual_find_column
+    
+    # assign values from mappings
+    for row in raw_rows[1:]:
+        new_row = row[:]
+        target_str = row[col_pos].upper()
+        
+        # check for exact match
+        data_id = mappings.get(target_str)
+        
+        # look for partial match if data_id is None
+        if data_id is None:
+            for key, value in mappings.items():
+                if key in target_str:
+                    data_id = value
+                    break
+                elif target_str in key:
+                    data_id = value
+                    break
+                # TODO raise error if no match found?
+        
+        if data_id is None: # if no match found, keep original str value
+            data_id = target_str
+            
+        new_row[col_pos] = data_id
+        updated_rows.append(new_row)
+        
+    return updated_rows
+
 def clean_gender(rows: list[list]) -> list[list [str | int]]:
     # takes in rows (list of lists)
     mapping = {'M': 1, 'MALE': 1,
@@ -44,7 +90,6 @@ def clean_gender(rows: list[list]) -> list[list [str | int]]:
     for row in rows[1:]:
         new_row = row[:]
         gender_str = row[gender_column]
-    # FIXME just realized, we can probably just create one function to clean column
     pass
 
 def clean_ethnicity(rows: list[list]) -> list[list [str | int]]:
@@ -83,9 +128,6 @@ def clean_ethnicity(rows: list[list]) -> list[list [str | int]]:
         updated_data.append(new_row)
     return updated_data
 
-def clean_organization(rows: list[list]) -> list[list [str | int]]:
-    pass 
-
 
 def find_column(columns: list, column_name: str) -> int | None: # takes in first row (columns) of our CSV rows
     # FIXME doesn't take into account partial matches
@@ -120,8 +162,9 @@ def create_tsv_with_headers(file_path: str) -> bool:
 
 def main():
     my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
-    print(clean_ethnicity(my_data))
+    # print(clean_ethnicity(my_data))
     #create_tsv_with_headers('data/test1.tsv')
+    print(clean_column("gender", my_data))
 
 if __name__ == "__main__":
     main()
