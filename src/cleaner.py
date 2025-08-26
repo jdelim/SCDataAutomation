@@ -2,7 +2,6 @@ import csv
 import pandas as pd
 import os
 import traceback
-import json
 from utils import create_mapping
 
 COL_1, COL_2, COL_3 = "EVENT_ID", "SESSION_ID", "AGE"
@@ -32,101 +31,57 @@ def readCSV(csv_file_path: str) -> list[list[int | str]] | None:
     except Exception as e:
         print(f"An error has occurred: {e}")
 
-def manual_find_column(column_name: str) -> int:
-    pass # TODO runs when program can't find column, prompt user for EXACT col name
+def manual_find_column(column_name: str, column_name_list: list) -> int:
+    for col_ind, col in enumerate(column_name_list):
+        if column_name.upper() == col.upper():
+            return col_ind
+    return None
 
-#FIXME works for gender, not ethnicity, must rewrite matching logic
 def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int]]:
     mappings = create_mapping(column_name)
-    print(mappings)
     col_pos = None
-    updated_rows = [[raw_rows[0]]]
+    first_row = raw_rows[0]
+    updated_rows = [first_row]
     
     # find which column to check
     for col_ind, col in enumerate(raw_rows[0]):
         if column_name.upper() == col.upper():
             col_pos = col_ind
             break
-    # TODO if col_pos is None, call manual_find_column
-    
+        
+    #if col_pos is None, call manual_find_column with user input
+    if col_pos is None:
+        input_col_name = input(f"Column {column_name} not found! Please enter the name of the column closest to \'{column_name}\'" +
+                        " on the CSV file!")
+        col_pos = manual_find_column(input_col_name, raw_rows[0])
+        
     # assign values from mappings
     for row in raw_rows[1:]:
         new_row = row[:]
-        target_str = row[col_pos].upper()
+        target_str_upper = row[col_pos].upper()
         
         # check for exact match
-        data_id = mappings.get(target_str)
+        data_id = mappings.get(target_str_upper)
         
-        # look for partial match if data_id is None
+        # checks mapping against csv values
         if data_id is None:
             for key, value in mappings.items():
-                if key in target_str:
+                if key.upper() in target_str_upper:
                     data_id = value
                     break
-                elif target_str in key:
+                elif target_str_upper in key.upper():
                     data_id = value
                     break
                 # TODO raise error if no match found?
+    
         
-        if data_id is None: # if no match found, keep original str value
-            data_id = target_str
+        if data_id is None: # FIXME implement fuzzy matching for partial matching!
+            data_id = target_str_upper
             
         new_row[col_pos] = data_id
         updated_rows.append(new_row)
         
     return updated_rows
-
-def clean_gender(rows: list[list]) -> list[list [str | int]]:
-    # takes in rows (list of lists)
-    mapping = {'M': 1, 'MALE': 1,
-               'F': 2, 'FEMALE': 2,
-               'O': 3, 'OTHER': 3, 'NP': 3, 'OTHER/NP': 3}
-    updated_data = [rows[0]]
-    gender_column = find_column(rows[0], "GENDER")
-
-    if gender_column is None:
-        raise ValueError("Gender column cannot be identified!")
-    
-    for row in rows[1:]:
-        new_row = row[:]
-        gender_str = row[gender_column]
-    pass
-
-def clean_ethnicity(rows: list[list]) -> list[list [str | int]]:
-    mapping = {'AMERICAN INDIAN': 1, 'ALASKA NATIVE': 1,
-               'ASIAN': 2, 'BLACK': 3, 'AFRICAN AMERICAN': 3,
-               'HISPANIC': 4, 'LATINO': 4, 'WHITE': 5,
-               'NATIVE HAWAIIAN': 6, 'PACIFIC ISLANDER': 6,
-               'MULTIRACIAL': 7, 'OTHER': 8}
-    updated_data = [[rows[0]]]
-    # check which column (index value) to check
-    ethnicity_column = find_column(rows[0], "ETHNICITY")
-    
-    # error check if column is not found
-    if ethnicity_column is None:
-        raise ValueError("Ethnicity column cannot be identified!")
-    
-    for row in rows[1:]: # skip over the column names row
-        new_row = row[:]
-        eth_str = row[ethnicity_column]
-
-        if isinstance(eth_str, str): # FIXME doesn't take into account if some rows have already been turned into id (int)
-            eth_upper = eth_str.upper()
-
-        # check for exact match
-        ethnicity_id = mapping.get(eth_upper)
-        # partial match
-        if ethnicity_id is None:
-            for key, value in mapping.items():
-                if key in eth_upper:
-                    ethnicity_id = value
-                    break
-        # raise error if no match found
-        if ethnicity_id is None:
-            raise ValueError(f"{eth_str} not found in map!")
-        new_row[ethnicity_column] = ethnicity_id
-        updated_data.append(new_row)
-    return updated_data
 
 
 def find_column(columns: list, column_name: str) -> int | None: # takes in first row (columns) of our CSV rows
@@ -159,12 +114,34 @@ def create_tsv_with_headers(file_path: str) -> bool:
         print(traceback.format_exc)
         return False
 
+def pretty_print(rows: list[list]) -> None:
+    """
+    Prints a list of lists in a tabular format.
+    """
+    if not rows:
+        print("No data.")
+        return
+
+    # find max width for each column
+    col_widths = [max(len(str(item)) for item in col) for col in zip(*rows)]
+
+    for row in rows:
+        formatted = " | ".join(str(item).ljust(width) for item, width in zip(row, col_widths))
+        print(formatted)
+    print("\n")
+
 
 def main():
     my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
-    # print(clean_ethnicity(my_data))
-    #create_tsv_with_headers('data/test1.tsv')
-    print(clean_column("gender", my_data))
+    pretty_print(my_data)
+    my_data = clean_column('ethnicity', my_data)
+    pretty_print(my_data)
+    my_data = clean_column('gender', my_data)
+    pretty_print(my_data)
+    my_data = clean_column('organization', my_data)
+    pretty_print(my_data)
+    
+    
 
 if __name__ == "__main__":
     main()
