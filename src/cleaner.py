@@ -2,7 +2,8 @@ import csv
 import pandas as pd
 import os
 import traceback
-from utils import create_mapping
+from difflib import get_close_matches
+from utils import *
 
 COL_1, COL_2, COL_3 = "EVENT_ID", "SESSION_ID", "AGE"
 COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
@@ -60,10 +61,10 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int
         new_row = row[:]
         target_str_upper = row[col_pos].upper()
         
-        # check for exact match
+        # 1) check for exact match
         data_id = mappings.get(target_str_upper)
         
-        # checks mapping against csv values
+        # 2) checks mapping against csv values
         if data_id is None:
             for key, value in mappings.items():
                 if key.upper() in target_str_upper:
@@ -74,8 +75,18 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int
                     break
                 # TODO raise error if no match found?
     
+        # 3) fuzzy match
+        if data_id is None:
+            possible_keys = list(mappings.keys())
+            matches = get_close_matches(target_str_upper, possible_keys, n=1, cutoff=0.6)
+            if matches:
+                suggested_key = matches[0]
+                confirm = input(f"No exact match for '{target_str_upper}'. Did you mean '{suggested_key}'? (y/n):")
+                if confirm.lower().startswith('y'):
+                    data_id = mappings[suggested_key]
         
-        if data_id is None: # FIXME implement fuzzy matching for partial matching!
+        if data_id is None: 
+            print(f"No match found for '{target_str_upper}'. Keeping original value.")
             data_id = target_str_upper
             
         new_row[col_pos] = data_id

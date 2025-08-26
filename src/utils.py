@@ -14,7 +14,13 @@ def create_mapping(json_column_name: str) -> dict:
     
     return mappings
         
-        
+def normalize(val: str) -> str:
+    val = val.lower().strip()
+    val = val.replace("and/or", "or")
+    val = val.replace("-", " ")
+    return " ".join(val.split())  # collapse extra spaces
+
+
 def main():
     print(create_mapping('organization'))
 
