@@ -10,20 +10,24 @@ COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
 COL_7, COL_8, COL_9 = "ETHNICITY_ID", "STUDENT_CODE", "POSTAL_CODE"
 COL_10, COL_11, COL_12 = "IS_RETURNING_STUDENT_FLAG", "STUDENT_FIRST_NAME", "STUDENT_LAST_NAME"
 
-def readCSV(csv_file_path: str) -> list[list[int | str]] | None:
+def readCSV(csv_file_path: str) -> list[list[str]] | None:
     try:
-        with open(csv_file_path, mode='r', newline='') as file:
+        with open(csv_file_path, mode='r', newline='', encoding='utf-8') as file:
             csv_reader = csv.reader(file)
             rows = []
             for row in csv_reader:
+                if not row:
+                    continue
                 converted_row = []
                 for val in row:
-                    # convert to int if digit
-                    if val.isdigit():
-                        converted_row.append(int(val))
-                    else:
-                        converted_row.append(val)
-                rows.append(converted_row)
+                    for val in row:
+                        converted_row.append(str(val)) # everything stays a string
+                    rows.append(converted_row)
+                #     if val.isdigit():
+                #         converted_row.append(int(val))
+                #     else:
+                #         converted_row.append(val)
+                # rows.append(converted_row)
             return rows
     except FileNotFoundError:
         print(f"Error: File '{csv_file_path}' not found!")
@@ -142,6 +146,7 @@ def main():
     for column in mycolumns:
         cleaned_data = clean_column(column, my_data)
     pretty_print(cleaned_data)    
+
     
 
 if __name__ == "__main__":
