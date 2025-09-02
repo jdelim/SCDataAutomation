@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 )
-from cleaner import readCSV
+from cleaner import *
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -16,6 +16,11 @@ class MainWindow(QMainWindow):
         self.upload_button.clicked.connect(self.load_csv)
         layout.addWidget(self.upload_button)
         
+        # clean button
+        self.clean_csv_button = QPushButton("Clean CSV")
+        self.clean_csv_button.clicked.connect(self.load_clean_csv)
+        layout.addWidget(self.clean_csv_button)
+        
         # table widget
         self.table = QTableWidget()
         layout.addWidget(self.table)
@@ -25,9 +30,36 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
         
+    def load_clean_csv(self): # FIXME cleaned values not displaying on table
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV", "", "CSV Files (*.csv)")
+        if not file_path:
+            return
+        
+        # use readCSV method from cleaner
+        data = readCSV(file_path)
+        clean_data = data
+        columns = ['gender', 'ethnicity', 'organization']
+        
+        for column in columns:
+            clean_data = clean_column(column, clean_data)
+        if not clean_data:
+            return
+        
+        # first row is headers
+        headers = clean_data[0]
+        rows = clean_data[1:]
+        
+        self.table.setColumnCount(len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
+        self.table.setRowCount(len(rows))
+        
+        # set items
+        for row_ind, row in enumerate(rows):
+            for col_ind, val in enumerate(row):
+                self.table.setItem(row_ind, col_ind, QTableWidgetItem(val))        
+    
     def load_csv(self):
-        print("load_csv called")
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV", "", "CSV FIles (*.csv)")
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV", "", "CSV Files (*.csv)")
         if not file_path:
             return
         
@@ -39,11 +71,10 @@ class MainWindow(QMainWindow):
         # first row is headers
         headers = data[0]
         rows = data[1:]
-        print(f"rows read from CSV: {len(rows)}")
-        #FIXME table is displaying 125 rows instead of 18
-        self.table.clear()                # clears contents + headers
-        self.table.setRowCount(0)         # reset rows
-        self.table.setColumnCount(0)      # reset columns
+        
+        self.table.setColumnCount(len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
+        self.table.setRowCount(len(rows))
         
         # set items
         for row_ind, row in enumerate(rows):

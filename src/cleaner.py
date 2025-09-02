@@ -20,9 +20,8 @@ def readCSV(csv_file_path: str) -> list[list[str]] | None:
                     continue
                 converted_row = []
                 for val in row:
-                    for val in row:
-                        converted_row.append(str(val)) # everything stays a string
-                    rows.append(converted_row)
+                    converted_row.append(str(val)) # everything stays a string
+                rows.append(converted_row)
                 #     if val.isdigit():
                 #         converted_row.append(int(val))
                 #     else:
