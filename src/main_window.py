@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
         
-    def load_clean_csv(self): # FIXME cleaned values not displaying on table
+    def load_clean_csv(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV", "", "CSV Files (*.csv)")
         if not file_path:
             return
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         # set items
         for row_ind, row in enumerate(rows):
             for col_ind, val in enumerate(row):
-                self.table.setItem(row_ind, col_ind, QTableWidgetItem(val))        
+                self.table.setItem(row_ind, col_ind, QTableWidgetItem(val))    
     
     def load_csv(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV", "", "CSV Files (*.csv)")

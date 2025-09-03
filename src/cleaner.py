@@ -39,7 +39,7 @@ def manual_find_column(column_name: str, column_name_list: list) -> int:
             return col_ind
     return None
 
-def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int]]:
+def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]: #FIXME have it return strings only
     mappings = create_mapping(column_name)
     normalized_mappings = {}
     for k, v in mappings.items():
@@ -77,7 +77,6 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int
                 if key in normalized_value or normalized_value in key:
                     data_id = value
                     break
-                # TODO raise error if no match found?
     
         # 3) fuzzy match on normalized keys
         if data_id is None:
@@ -94,12 +93,41 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str | int
             print(f"No match found for '{raw_value}'. Keeping original value.")
             data_id = raw_value
             
-        new_row[col_pos] = data_id
+        new_row[col_pos] = str(data_id) # wrap cleaned value as string
         updated_rows.append(new_row)
         
     return updated_rows
 
+def insert_tsv_values(file_path: str, cleaned_rows: list[list[str]]):
+    tsv_headers = [
+        COL_1, COL_2, COL_3,
+        COL_4, COL_5, COL_6,
+        COL_7, COL_8, COL_9,
+        COL_10, COL_11, COL_12
+    ]
+    matched_indices = {}
+    tsv_headers_dict = dict(tsv_headers)
+    print(tsv_headers_dict)
+    cleaned_headers = cleaned_rows[0]
+    
+    # match cleaned_row headers to tsv_headers indices
+    
+    # iterate over headers of the cleaned rows
+    # for header in cleaned_headers:
+        
+    
+    return
+
 def create_tsv_with_headers(file_path: str) -> bool:
+    """"
+    Creates a .tsv file in the desired file path with headers that match the EVENT_STUDENT_DEMOGRAPHICS table in Snowflake.
+
+    Args:
+        file_path (str): enter the desired file path and filename. e.g. 'data/example.tsv'
+
+    Returns:
+        bool: Returns True if .tsv file successfully created, false otherwise.
+    """
     headers = [
         COL_1, COL_2, COL_3,
         COL_4, COL_5, COL_6,
@@ -139,12 +167,14 @@ def pretty_print(rows: list[list]) -> None:
 
 
 def main():
-    mycolumns = ['ethnicity', 'gender', 'organization']
-    my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
-    pretty_print(my_data)
-    for column in mycolumns:
-        cleaned_data = clean_column(column, my_data)
-    pretty_print(cleaned_data)    
+    # mycolumns = ['ethnicity', 'gender', 'organization']
+    # my_data = readCSV('data/Uncommon_Goods_Student_Demographics.csv')
+    # pretty_print(my_data)
+    # for column in mycolumns:
+    #     cleaned_data = clean_column(column, my_data)
+    # pretty_print(cleaned_data)    
+    # print(create_tsv_with_headers('data/example.tsv'))
+    pass
 
     
 
