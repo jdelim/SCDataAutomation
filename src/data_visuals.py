@@ -107,43 +107,79 @@ def plot_gender_bar_graph_wide(conn, query: str, title, xlabel, ylabel):
     plt.tight_layout()
     plt.show()
 
-def plot_grade_level_bar_graph(conn, query: str, xCol: str, yCol: str, hueCol: str, title, xlabel, ylabel):
-    """
-    Plots grade level percentages per fiscal year as a stacked bar chart.
-
-    Parameters:
-        conn : database connection object
-        query : str : SQL query returning xCol, hueCol, yCol
-        xCol : str : column name for fiscal year
-        yCol : str : column name for percentage
-        hueCol : str : column name for grade level
-        title : str : chart title
-        xlabel : str : x-axis label
-        ylabel : str : y-axis label
-    """
+def plot_grade_level_stacked(conn, query: str, title, xlabel, ylabel):
+    # Load query results
     df = pd.read_sql(query, conn)
-    print(df)
+    df.columns = df.columns.str.lower()  # normalize column names
+    print(df.head())  # debug
 
-    # pivot table: rows=fiscal year, columns=grade level, values=percentage
-    pivot_df = df.pivot_table(index=xCol, columns=hueCol, values=yCol, fill_value=0)
+    # Pivot so each fiscal_year is a row, grade levels are columns
+    pivot_df = df.pivot_table(
+        index='fiscal_year',
+        columns='grade_level',
+        values='student_count',
+        aggfunc='sum',
+        fill_value=0
+    )
 
-    # plot stacked bar chart
-    ax = pivot_df.plot(kind='bar', stacked=True, figsize=(14, 7))
+    # Compute percentages
+    percent_df = pivot_df.div(pivot_df.sum(axis=1), axis=0) * 100
 
-    # move legend outside to top right
-    plt.legend(title='Grade Level', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9, title_fontsize=10)
+    # Plot stacked percentages
+    ax = percent_df.plot(kind='bar', stacked=True, figsize=(14, 7))
 
+    # Add percentage labels inside bars
     for container in ax.containers:
         labels = [f"{v:.1f}%" if v > 0 else "" for v in container.datavalues]
-        ax.bar_label(container, labels=labels, label_type='center', fontsize=9)
+        ax.bar_label(container, labels=labels, label_type='center', fontsize=7)
 
-    plt.title(title, fontsize=16)
-    plt.xlabel(xlabel, fontsize=12)
-    plt.ylabel(ylabel, fontsize=12)
+    # Add fiscal year totals above each bar
+    totals = pivot_df.sum(axis=1)
+    for idx, total in enumerate(totals):
+        ax.text(idx, 101, f"{int(total)}", ha='center', va='bottom',
+                fontsize=10, fontweight='bold')
+
+    # Legend & labels
+    plt.legend(title='Grade Level', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel + " (%)")
     plt.xticks(rotation=45)
+    plt.ylim(0, 110)  # room for total labels
     plt.tight_layout()
     plt.show()
 
+def plot_event_type_stacked(conn, query: str, title, xlabel, ylabel):
+    df = pd.read_sql(query, conn)
+    print(df)
+
+    type_cols = ['CLASS', 'FIELD_TRIP', 'WORKSHOP', 'FUNDRAISER', 'CAMP', 'FUN_ACTIVITY']
+    plot_df = df.set_index('FISCAL_YEAR')[type_cols]
+
+    # compute percentages per fiscal year
+    percent_df = plot_df.div(plot_df.sum(axis=1), axis=0) * 100
+
+    # plot stacked bars
+    ax = percent_df.plot(kind='bar', stacked=True, figsize=(14, 7))
+
+    # add percentage labels inside bars
+    for container in ax.containers:
+        labels = [f"{v:.1f}%" if v > 0 else "" for v in container.datavalues]
+        ax.bar_label(container, labels=labels, label_type='center', fontsize=8)
+
+    # add total student counts above each bar
+    for idx, total in enumerate(plot_df.sum(axis=1)):
+        ax.text(idx, 102, f"{int(total)}", ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    # legend and labels
+    plt.legend(title='Event Type', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel + " (%)")
+    plt.xticks(rotation=45)
+    plt.ylim(0, 110)  # leave space for totals above 100%
+    plt.tight_layout()
+    plt.show()
 
 def main():
     conn = make_connection(find_env_variables())
@@ -276,52 +312,109 @@ def main():
     """
     
     grade_percentages_query = """
-        SELECT
-    CONCAT(
-        CASE WHEN MONTH(SES.session_start_date) >= 7 
-             THEN YEAR(SES.session_start_date)
-             ELSE YEAR(SES.session_start_date) - 1
-        END,
-        '-',
-        CASE WHEN MONTH(SES.session_start_date) >= 7
-             THEN YEAR(SES.session_start_date) + 1
-             ELSE YEAR(SES.session_start_date)
-        END
-    ) AS FISCAL_YEAR,
-    CASE 
-        WHEN DEM.GRADE = 0 THEN 'K'
-        WHEN DEM.GRADE = -1 THEN 'TK'
-        ELSE TO_VARCHAR(DEM.GRADE)
-    END AS GRADE_LEVEL,
-    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY 
-        CONCAT(
-            CASE WHEN MONTH(SES.session_start_date) >= 7 
-                 THEN YEAR(SES.session_start_date)
-                 ELSE YEAR(SES.session_start_date) - 1
-            END,
-            '-',
-            CASE WHEN MONTH(SES.session_start_date) >= 7
-                 THEN YEAR(SES.session_start_date) + 1
-                 ELSE YEAR(SES.session_start_date)
-            END
-        )
-    ), 2) AS PCT
-FROM EVENT_STUDENT_DEMOGRAPHIC AS DEM
-JOIN EVENT_SESSION AS SES
-    ON DEM.session_id = SES.session_id
-WHERE DEM.GRADE IS NOT NULL
-GROUP BY FISCAL_YEAR, GRADE_LEVEL
-ORDER BY FISCAL_YEAR, 
+        WITH student_sessions AS (
+    SELECT
+        CASE 
+            WHEN MONTH(s.session_start_date) >= 7 
+            THEN TO_VARCHAR(YEAR(s.session_start_date)) || '-' || TO_VARCHAR(YEAR(s.session_start_date) + 1)
+            ELSE TO_VARCHAR(YEAR(s.session_start_date) - 1) || '-' || TO_VARCHAR(YEAR(s.session_start_date))
+        END AS fiscal_year,
+        CASE 
+            WHEN d.grade = 0 THEN 'K'
+            WHEN d.grade = -1 THEN 'TK'
+            ELSE TO_VARCHAR(d.grade)
+        END AS grade_level
+    FROM EVENT_STUDENT_DEMOGRAPHIC d
+    JOIN EVENT_SESSION s
+      ON d.event_id = s.event_id
+     AND d.session_id = s.session_id   -- <- important: join on both keys
+    WHERE d.grade IS NOT NULL
+)
+SELECT
+    fiscal_year,
+    grade_level,
+    COUNT(*) AS student_count,
+    SUM(COUNT(*)) OVER (PARTITION BY fiscal_year) AS fiscal_total,
+    ROUND(
+        COUNT(*) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (PARTITION BY fiscal_year), 0),
+        2
+    ) AS pct
+FROM student_sessions
+GROUP BY fiscal_year, grade_level
+ORDER BY fiscal_year,
          CASE 
-            WHEN GRADE_LEVEL='TK' THEN 0
-            WHEN GRADE_LEVEL='K' THEN 1
-            ELSE TO_NUMBER(GRADE_LEVEL)
+            WHEN grade_level = 'TK' THEN 0
+            WHEN grade_level = 'K'  THEN 1
+            ELSE TO_NUMBER(grade_level)
          END;
+
     """
     
-    plot_grade_level_bar_graph(conn, grade_percentages_query, xCol='FISCAL_YEAR', yCol='PCT', hueCol='GRADE_LEVEL',
-                               title='Grade Level Distribution per Fiscal Year', xlabel='Fiscal Year', ylabel='Percentage')
+    event_type_query = """
+        WITH esd_counts AS (
+    SELECT 
+        event_id,
+        session_id,
+        COUNT(*) AS student_count
+    FROM EVENT_STUDENT_DEMOGRAPHIC
+    GROUP BY event_id, session_id
+),
+ea_counts AS (
+    SELECT
+        event_id,
+        session_id,
+        COALESCE(actual_attendee_cnt, reserved_attendee_cnt) AS activity_count
+    FROM EVENT_ACTIVITY
+),
+combined AS (
+    SELECT
+        e.session_start_date,
+        e.type_id,
+        COALESCE(esd.student_count, ea.activity_count) AS final_count
+    FROM EVENT_SESSION e
+    LEFT JOIN esd_counts esd
+        ON e.event_id = esd.event_id
+       AND e.session_id = esd.session_id
+    LEFT JOIN ea_counts ea
+        ON e.event_id = ea.event_id
+       AND e.session_id = ea.session_id
+),
+fiscal AS (
+    SELECT 
+        CASE 
+            WHEN MONTH(session_start_date) >= 7 
+                THEN TO_VARCHAR(YEAR(session_start_date)) || '-' || TO_VARCHAR(YEAR(session_start_date) + 1)
+            ELSE TO_VARCHAR(YEAR(session_start_date) - 1) || '-' || TO_VARCHAR(YEAR(session_start_date))
+        END AS fiscal_year,
+        type_id,
+        final_count
+    FROM combined
+)
+SELECT 
+    fiscal_year,
+    SUM(final_count) AS total_students,
+    SUM(CASE WHEN type_id = 1 THEN final_count ELSE 0 END) AS class,
+    SUM(CASE WHEN type_id = 2 THEN final_count ELSE 0 END) AS field_trip,
+    SUM(CASE WHEN type_id = 3 THEN final_count ELSE 0 END) AS workshop,
+    SUM(CASE WHEN type_id = 4 THEN final_count ELSE 0 END) AS fundraiser,
+    SUM(CASE WHEN type_id = 5 THEN final_count ELSE 0 END) AS camp,
+    SUM(CASE WHEN type_id = 6 THEN final_count ELSE 0 END) AS fun_activity
+FROM fiscal
+GROUP BY fiscal_year
+ORDER BY fiscal_year;
+    """
     
+    # plot_event_type_stacked(conn, event_type_query, title="Students per Fiscal Year by Event Type", xlabel="FISCAL_YEAR",
+    #                         ylabel="TOTAL_STUDENTS")
+    
+    
+    plot_grade_level_stacked(
+    conn,
+    grade_percentages_query,
+    title="Students per Fiscal Year by Grade Level",
+    xlabel="FISCAL_YEAR",
+    ylabel="STUDENT_COUNT"
+)    
     #plot_students_per_fiscal_year(conn, students_per_fiscal_year_query, title="Total Students per Fiscal Year", 
                                   #xlabel="Fiscal Year", ylabel="Total Students")
 

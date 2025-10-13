@@ -39,7 +39,7 @@ def manual_find_column(column_name: str, column_name_list: list) -> int:
             return col_ind
     return None
 
-def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]: #FIXME have it return strings only
+def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]: 
     mappings = create_mapping(column_name)
     normalized_mappings = {}
     for k, v in mappings.items():
@@ -148,6 +148,78 @@ def create_tsv_with_headers(file_path: str) -> bool:
         print("TRACEBACK:")
         print(traceback.format_exc)
         return False
+
+def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str] | None:
+    """
+    Maps a cleaned CSV file's column names to TSV column names. Maps through exact mapping, dictionary/synonym lookup, fuzzy match,
+    and manual user input if all else fails.
+
+    Args:
+        csv_file_path (str): Path to CSV file.
+
+    Returns:
+        dict[str, str] | None: Dictionary mapping TSV column names to CSV column names.
+        E.g., {'EVENT_ID': 'event_id', 'SESSION_ID': 'sessionID', ... , 'STUDENT_FIRST_NAME', 'first name', ...}.
+    
+    Raises:
+        ValueError: If csv_file_path is empty or TSV headers are invalid.
+        FileNotFoundError: If the CSV file doesn't exist.
+        IOError: If the CSV file cannot be read.
+        KeyboardInterrupt: If user cancels the mapping process.
+    """
+    
+    if not csv_file_path:
+        raise ValueError("CSV file path cannot be empty!")
+
+    if not os.path.exists(csv_file_path):
+        raise FileNotFoundError(f"File '{csv_file_path}' does not exist!")
+    
+    tsv_headers = [
+        COL_1, COL_2, COL_3,
+        COL_4, COL_5, COL_6,
+        COL_7, COL_8, COL_9,
+        COL_10, COL_11, COL_12
+    ]
+    
+    # read in CSV headers
+    try:
+        csv_rows = readCSV(csv_file_path)
+    except Exception as e:
+        raise IOError(f"Error reading CSV file: {e}") from e
+    
+    if csv_rows is None or len(csv_rows) == 0:
+        raise IOError("Could not read CSV file or file is empty!")
+    
+    csv_headers = csv_rows[0]
+    
+    # check if csv headers is empty
+    if not csv_headers:
+        raise ValueError("CSV file has no errors!")
+    
+    # normalize CSV headers and check for empty headers
+    csv_headers = [str(header).strip for header in csv_headers]
+    if '' in csv_headers:
+        print("Warning: CSV contains empty column headers!")
+        
+    column_mapping = {}
+    used_csv_columns = set()
+    
+    print("\n=== Column Mapping ===")
+    print(f"CSV has {len(csv_headers)} columns")
+    print(f"TSV expects {len(tsv_headers)} columns")
+    print("\nCSV Columns:", ", ".join(csv_headers))
+    print()
+    
+    # automatic mapping
+    try:
+        for tsv_col in tsv_headers:
+            matched = False
+    except:
+        pass
+    
+    
+def transfer_csv_to_csv_with_mapping():
+    pass
 
 def pretty_print(rows: list[list]) -> None:
     """
