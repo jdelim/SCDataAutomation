@@ -149,10 +149,10 @@ def create_tsv_with_headers(file_path: str) -> bool:
         print(traceback.format_exc)
         return False
 
-def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str] | None:
+def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str | None] | None:
     """
-    Maps a cleaned CSV file's column names to TSV column names. Maps through exact mapping, dictionary/synonym lookup, fuzzy match,
-    and manual user input if all else fails.
+    Maps a cleaned CSV file's column names to TSV column names. Maps through exact mapping, dictionary/synonym lookup, and fuzzy match.
+    Manual user matching will be handled through the GUI.
 
     Args:
         csv_file_path (str): Path to CSV file.
@@ -210,15 +210,39 @@ def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str] | None:
     print("\nCSV Columns:", ", ".join(csv_headers))
     print()
     
+    # load synonym mapping from json
+    try:
+        synonym_mapping = load_synonym_columns()
+    
     # automatic mapping
     try:
         for tsv_col in tsv_headers:
             matched = False
+            
+            # look for exact match (case-insensitive, normalized)
+            for csv_col in csv_headers:
+                if not csv_col:
+                    continue
+                if tsv_col == csv_col.upper():
+                    if csv_col in used_csv_columns():
+                        # skips duplicate mappings
+                        continue
+                    column_mapping[tsv_col] = csv_col
+                    used_csv_columns.add(csv_col)
+                    matched = True
+                    break
+            
+            if not matched and tsv_col in synonym
+            
+            if not matched:
+                column_mapping[tsv_col] = None
+            
+        return column_mapping
     except:
         pass
     
     
-def transfer_csv_to_csv_with_mapping():
+def transfer_csv_to_tsv_with_mapping():
     pass
 
 def pretty_print(rows: list[list]) -> None:
