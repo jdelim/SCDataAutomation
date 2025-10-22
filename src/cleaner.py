@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import traceback
 from difflib import get_close_matches
-from utils import *
+from .utils import *
 
 COL_1, COL_2, COL_3 = "EVENT_ID", "SESSION_ID", "AGE"
 COL_4, COL_5, COL_6 = "GRADE", "ORG_ID", "GENDER_ID"
@@ -39,7 +39,7 @@ def manual_find_column(column_name: str, column_name_list: list) -> int:
             return col_ind
     return None
 
-def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]: #FIXME have it return strings only
+def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]: 
     mappings = create_mapping(column_name)
     normalized_mappings = {}
     for k, v in mappings.items():
@@ -148,6 +148,120 @@ def create_tsv_with_headers(file_path: str) -> bool:
         print("TRACEBACK:")
         print(traceback.format_exc)
         return False
+
+def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str | None] | None: #TODO add fuzzy matchI
+    """
+    Maps a cleaned CSV file's column names to TSV column names. Maps through exact mapping, dictionary/synonym lookup, and fuzzy match.
+    Manual user matching will be handled through the GUI.
+
+    Args:
+        csv_file_path (str): Path to CSV file.
+
+    Returns:
+        dict[str, str] | None: Dictionary mapping TSV column names to CSV column names.
+        E.g., {'EVENT_ID': 'event_id', 'SESSION_ID': 'sessionID', ... , 'STUDENT_FIRST_NAME', 'first name', ...}.
+    
+    Raises:
+        ValueError: If csv_file_path is empty or TSV headers are invalid.
+        FileNotFoundError: If the CSV file doesn't exist.
+        IOError: If the CSV file cannot be read.
+        KeyboardInterrupt: If user cancels the mapping process.
+    """
+    
+    if not csv_file_path:
+        raise ValueError("CSV file path cannot be empty!")
+
+    if not os.path.exists(csv_file_path):
+        raise FileNotFoundError(f"File '{csv_file_path}' does not exist!")
+    
+    tsv_headers = [
+        COL_1, COL_2, COL_3,
+        COL_4, COL_5, COL_6,
+        COL_7, COL_8, COL_9,
+        COL_10, COL_11, COL_12
+    ]
+    
+    # read in CSV headers
+    try:
+        csv_rows = readCSV(csv_file_path)
+    except Exception as e:
+        raise IOError(f"Error reading CSV file: {e}") from e
+    
+    if csv_rows is None or len(csv_rows) == 0:
+        raise IOError("Could not read CSV file or file is empty!")
+    
+    csv_headers = csv_rows[0]
+    
+    # check if csv headers is empty
+    if ( # checking if first row is just data or actual headers
+        not csv_headers
+        or all(h.strip() == "" for h in csv_headers)
+        or all(h.strip().isdigit() for h in csv_headers)
+        or len(set(csv_headers)) == 1
+    ):
+        raise ValueError("CSV file has no headers")
+    
+    # normalize CSV headers and check for empty headers
+    csv_headers = [str(header).strip() for header in csv_headers]
+    if '' in csv_headers:
+        print("Warning: CSV contains empty column headers!")
+        
+    column_mapping = {}
+    used_csv_columns = set()
+    
+    print("\n=== Column Mapping ===")
+    print(f"CSV has {len(csv_headers)} columns")
+    print(f"TSV expects {len(tsv_headers)} columns")
+    print("\nCSV Columns:", ", ".join(csv_headers))
+    print()
+    
+    # load synonym mapping from json
+    try:
+        synonym_mapping = load_column_synonyms()
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"WARNING: Could not load synonyms: {e}. Skipping synonym matching")
+        synonym_mapping = {}
+    
+    # automatic mapping
+    for tsv_col in tsv_headers:
+        matched = False
+        
+        # look for exact match (case-insensitive, normalized)
+        for csv_col in csv_headers:
+            if not csv_col:
+                continue
+            if tsv_col == csv_col.upper():
+                if csv_col in used_csv_columns:
+                    # skips duplicate mappings
+                    continue
+                column_mapping[tsv_col] = csv_col
+                used_csv_columns.add(csv_col)
+                matched = True
+                break
+        
+        if not matched and tsv_col in synonym_mapping:
+            synonyms = synonym_mapping[tsv_col]
+            for csv_col in csv_headers:
+                if not csv_col:
+                    continue
+                if csv_col in used_csv_columns:
+                    continue
+                # check if csv col matches synonym
+                csv_col_upper = csv_col.upper()
+                if csv_col_upper in [syn.upper() for syn in synonyms]:
+                    column_mapping[tsv_col] = csv_col
+                    used_csv_columns.add(csv_col)
+                    matched = True
+                    break
+        
+        if not matched:
+            column_mapping[tsv_col] = None
+        
+    return column_mapping
+        
+    
+def transfer_csv_to_tsv_with_mapping():
+    pass
 
 def pretty_print(rows: list[list]) -> None:
     """

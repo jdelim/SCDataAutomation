@@ -1,0 +1,14 @@
+{
+  "EVENT_ID": ["event id", "eventid", "event_identifier", "event number"],
+  "SESSION_ID": ["session id", "sessionid", "session_identifier", "session number"],
+  "AGE": ["age", "student age", "student_age"],
+  "GRADE": ["grade", "grade level", "student grade", "gradelevel"],
+  "ORG_ID": ["org id", "orgid", "organization id", "organization_id"],
+  "GENDER_ID": ["gender id", "genderid", "sex", "gender", "sex_id"],
+  "ETHNICITY_ID": ["ethnicity id", "ethnicityid", "race", "ethnicity", "race_id"],
+  "STUDENT_CODE": ["student code", "studentcode", "student_identifier", "student id", "studentid"],
+  "POSTAL_CODE": ["postal code", "postalcode", "zip", "zipcode", "zip code"],
+  "IS_RETURNING_STUDENT_FLAG": ["is returning student flag", "returning student", "is_returning", "returning"],
+  "STUDENT_FIRST_NAME": ["student first name", "first name", "firstname", "student_firstname", "fname"],
+  "STUDENT_LAST_NAME": ["student last name", "last name", "lastname", "student_lastname", "lname"]
+}
