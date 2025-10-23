@@ -22,11 +22,6 @@ def readCSV(csv_file_path: str) -> list[list[str]] | None:
                 for val in row:
                     converted_row.append(str(val)) # everything stays a string
                 rows.append(converted_row)
-                #     if val.isdigit():
-                #         converted_row.append(int(val))
-                #     else:
-                #         converted_row.append(val)
-                # rows.append(converted_row)
             return rows
     except FileNotFoundError:
         print(f"Error: File '{csv_file_path}' not found!")
@@ -97,26 +92,6 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]:
         updated_rows.append(new_row)
         
     return updated_rows
-
-def insert_tsv_values(file_path: str, cleaned_rows: list[list[str]]):
-    tsv_headers = [
-        COL_1, COL_2, COL_3,
-        COL_4, COL_5, COL_6,
-        COL_7, COL_8, COL_9,
-        COL_10, COL_11, COL_12
-    ]
-    matched_indices = {}
-    tsv_headers_dict = dict(tsv_headers)
-    print(tsv_headers_dict)
-    cleaned_headers = cleaned_rows[0]
-    
-    # match cleaned_row headers to tsv_headers indices
-    
-    # iterate over headers of the cleaned rows
-    # for header in cleaned_headers:
-        
-    
-    return
 
 def create_tsv_with_headers(file_path: str) -> bool:
     """"
@@ -259,8 +234,41 @@ def map_csv_to_tsv_columns(csv_file_path: str) -> dict[str, str | None] | None: 
         
     return column_mapping
         
-    
-def transfer_csv_to_tsv_with_mapping():
+def transfer_csv_to_tsv_with_mapping(csv_file_path: str, tsv_file_path: str, column_mapping: dict[str, str | None]) -> bool:
+    try:
+        # read CSV file and error handling
+        tsv_headers = [
+            COL_1, COL_2, COL_3,
+            COL_4, COL_5, COL_6,
+            COL_7, COL_8, COL_9,
+            COL_10, COL_11, COL_12
+        ]
+        
+        csv_rows = readCSV(csv_file_path)
+        
+        if csv_rows is None:
+            raise IOError(f"Failed to read CSV file: {csv_file_path}")
+        if len(csv_rows) < 1:
+            raise IOError(f"CSV file is empty: {csv_file_path}")
+        
+        csv_headers = csv_rows[0]
+        csv_data = csv_rows[1:]
+        
+        if len(csv_data == 0):
+            raise IOError(f"CSV file has headers but no data rows: {csv_file_path}")
+        
+        # mapping for csv col to index
+        csv_col_to_index = {col: idx for idx, col in enumerate(csv_headers)}
+        
+        tsv_data = []
+        
+        # processing logic
+        
+    except Exception as e:
+        print(f"Error! Failed to transfer data: {e}")
+        print("TRACEBACK:")
+        print(traceback.format_exc())
+        return False
     pass
 
 def pretty_print(rows: list[list]) -> None:
