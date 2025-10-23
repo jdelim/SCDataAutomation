@@ -1,4 +1,5 @@
 .env
 private_key.pem
-.der
+private_key.der
 .venv/
+__pycache__/
