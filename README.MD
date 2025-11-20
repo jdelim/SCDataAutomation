@@ -5,18 +5,62 @@
 ## Overview
 **STEAMSync** is a data automation tool built for the **STEAM:CODERS** organization. It streamlines the process of preparing raw class and student data for database upload and analysis.
 
-The program takes in **raw CSV files** containing student and class information, cleans and standardizes the data, and outputs ready-to-upload **TSV or CSV** files optimized for **Snowflake** ingestion.  
+The application ingests raw **CSV files** containing student and class information, applies standardized cleaning rules, assists with column mapping, and outputs Snowflake-ready **TSV files**.
 
-By automating repetitive data preparation tasks, STEAMSync reduces manual work, improves accuracy, and ensures consistent formatting across all data sources.
+By automating repetitive data preparation tasks, STEAMSync reduces manual work, improves accuracy, and ensures consistent formatting across all instructor-submitted data.
+
+---
 
 ## Current Progress
+
 | Feature | Status | Notes |
-|----------|---------|-------|
-| CSV parsing & cleaning logic | ✅ Complete | Handles basic data normalization |
-| Column mapping system | ⚙️ In Progress | Exact + fuzzy header matching |
-| TSV/CSV export module | ⚙️ Testing | Outputs formatted Snowflake-ready data |
-| GUI for manual column matching | 🔜 Planned | For user-assisted mapping |
-| Snowflake integration | 🔜 Planned | Upload pipeline connection |
+|--------|--------|-------|
+| CSV parsing logic | ✅ Complete | Stable CSV ingestion (Python `csv` module) |
+| Data cleaning engine (`cleaner.py`) | ✅ Complete | Working version implemented; ORG_ID improvement pending *(orgs not found in JSON should retain raw value instead of defaulting to 382)* |
+| Column mapping system | ✅ Complete | Exact matching + synonym/dictionary-based header matching |
+| Manual column mapping UI | ✅ Complete | PySide6 dialog for user-guided mapping of unmapped fields |
+| Full desktop UI | ✅ Complete | Upload → Clean → Preview → Export workflow functioning end-to-end |
+| TSV export module | ⚙️ Testing | Converts cleaned CSV to Snowflake-formatted TSV with mapped headers |
+| Snowflake integration | 🔜 Planned | Future pipeline to push files directly to Snowflake |
+
+
+## Roadmap / Remaining Tasks
+
+### 1. Build a standalone executable
+A packaged version of STEAMSync (Windows `.exe`) still needs to be created.  
+This will allow users to run the tool without installing Python or any dependencies.
+
+Planned options:
+- **PyInstaller** (fastest, most compatible)
+- **Nuitka** (more optimized, slower builds)
+
+---
+
+### 2. Create an offline / no-Snowflake-required version
+Currently, Snowflake integration is planned but optional.
+
+A future update will include:
+- A **fully offline mode**  
+- A **sample local database or example dataset**  
+- No Snowflake credentials required
+
+This ensures that anyone can run the executable without needing access to the STEAM:CODERS Snowflake environment.
+
+---
+
+## Current Application Flow (UI Completed)
+
+The new GUI supports the full cleaning workflow:
+
+1. **Upload CSV**  
+2. **Run automated cleaning (cleaner.py)**  
+3. **Resolve unmapped columns via dropdown dialog**  
+4. **Preview raw + cleaned tables side-by-side**  
+5. **Export final cleaned TSV**
+
+This replaces the temporary CLI flow and is now the primary way to use STEAMSync.
+
+---
 
 ## Connecting to the STEAM:CODERS Snowflake Database
 Once you have created your Snowflake account and given access to the Snowflake database by an admin, you can use **key pair authentication** to connect securely.  

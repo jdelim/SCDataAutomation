@@ -3,7 +3,7 @@
   "SESSION_ID": ["session id", "sessionid", "session_identifier", "session number"],
   "AGE": ["age", "student age", "student_age"],
   "GRADE": ["grade", "grade level", "student grade", "gradelevel"],
-  "ORG_ID": ["org id", "orgid", "organization id", "organization_id"],
+  "ORG_ID": ["org id", "orgid", "organization id", "organization_id", "school"],
   "GENDER_ID": ["gender id", "genderid", "sex", "gender", "sex_id"],
   "ETHNICITY_ID": ["ethnicity id", "ethnicityid", "race", "ethnicity", "race_id"],
   "STUDENT_CODE": ["student code", "studentcode", "student_identifier", "student id", "studentid"],

@@ -2,8 +2,7 @@ from connection import find_env_variables, make_connection
 import pandas as pd
 import seaborn as sns
 import numpy as np
-import matplotlib.pyplot as plt #FIXME mpl and seaborn not being recognized after moving to src/
-
+import matplotlib.pyplot as plt
 def plot_students_per_fiscal_year(conn, query: str, title, xlabel, ylabel):
     """
     Plots total students per fiscal year as a bar chart.
