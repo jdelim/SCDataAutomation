@@ -144,6 +144,8 @@ def clean_column(column_name: str, raw_rows: list[list]) -> list[list [str]]:
         raw_value = row[col_pos]
         normalized_value = normalize(raw_value)
         
+        #FIXME keep raw value if org name doesnt exist in database!
+        
         # 1) check for exact match on normalized value (includes all synonyms)
         data_id = normalized_lookup.get(normalized_value)
         
