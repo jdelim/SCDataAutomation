@@ -1,5 +1,5 @@
 {
-  "ethnicity": {
+  "ethnicity_id": {
     "American Indian or Alaska Native": 1,
     "Asian": 2,
     "Black or African American": 3,
@@ -9,12 +9,12 @@
     "Multiracial": 7,
     "Other Race": 8
   },
-  "gender": {
+  "gender_id": {
     "Male": 1,
     "Female": 2,
     "Other/NP": 3
   },
-  "organization": {
+  "org_id": {
     "STEAM:CODERS": 1,
     "Innovate Pasadena": 2,
     "Warner Bros.": 3,

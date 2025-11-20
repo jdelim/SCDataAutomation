@@ -18,6 +18,20 @@ def load_column_synonyms(json_file_path: str = 'mappings/column_synonyms.json') 
     with open(json_file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
         
+def load_value_synonyms(json_file_path: str = 'mappings/value_synonyms.json') -> dict[str, dict[str, list[str]]]:
+    """
+    Loads value synonym mappings from JSON file.
+    
+    Args:
+        json_file_path (str): Path to the value_synonyms.json file
+        
+    Returns:
+        dict[str, dict[str, list[str]]]: Nested dictionary mapping column names to their value synonyms.
+        E.g., {'GENDER_ID': {'Male': ['M', 'Man', ...], 'Female': ['F', 'Woman', ...]}, ...}
+    """
+    with open(json_file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
 def normalize(val: str) -> str:
     val = val.lower().strip()
     val = val.replace("and/or", "or")

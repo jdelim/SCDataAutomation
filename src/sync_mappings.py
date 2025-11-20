@@ -5,9 +5,9 @@ import pandas as pd
 def export_mappings(conn, file_path='mappings/key_ids.json'): # TODO add error handling
     mappings = {}
     query_map = {
-        "ethnicity": "SELECT ETHNICITY_NAME, ETHNICITY_ID FROM ETHNICITY;",
-        "gender": "SELECT GENDER_TAG, GENDER_ID FROM GENDER;",
-        "organization": "SELECT ORG_NAME, ORG_ID FROM ORGANIZATION;"
+        "ethnicity_id": "SELECT ETHNICITY_NAME, ETHNICITY_ID FROM ETHNICITY;",
+        "gender_id": "SELECT GENDER_TAG, GENDER_ID FROM GENDER;",
+        "org_id": "SELECT ORG_NAME, ORG_ID FROM ORGANIZATION;"
     }
     cur = conn.cursor()
 
