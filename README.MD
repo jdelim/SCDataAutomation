@@ -9,6 +9,8 @@ The application ingests raw **CSV files** containing student and class informati
 
 By automating repetitive data preparation tasks, STEAMSync reduces manual work, improves accuracy, and ensures consistent formatting across all instructor-submitted data.
 
+![demo](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzd0d3VvZ3IzdnN5cnVhZXE4dDlrcHJkZnEzYnJ4bzAxMTJ2Nm5jOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/etQCC26rha9c1V2fzM/giphy.gif)
+
 ---
 
 ## Current Progress
