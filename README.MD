@@ -1,8 +1,10 @@
 # STEAMSync
-![status: in development](https://img.shields.io/badge/status-in%20development-yellow)
+![status: pre-release](https://img.shields.io/badge/status-pre--release-yellow)
+![version](https://img.shields.io/badge/version-v0.1.0-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
 ## Overview
+**Current Version:** v0.1.0 (Pre-release)
 **STEAMSync** is a data automation tool built for the **STEAM:CODERS** organization. It streamlines the process of preparing raw class and student data for database upload and analysis.
 
 The application ingests raw **CSV files** containing student and class information, applies standardized cleaning rules, assists with column mapping, and outputs Snowflake-ready **TSV files**.
